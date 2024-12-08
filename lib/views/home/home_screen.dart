@@ -12,12 +12,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late ScrollController _scrollController;
+  late TextEditingController _searchController;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController()
-      ..addListener(_onScroll);
+      ..addListener(_onScroll); // Attach the scroll listener
+    _searchController = TextEditingController();
+
+    // Fetch the initial set of movies when the screen is initialized
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final homeController = context.read<HomeController>();
       homeController.fetchMovies();
@@ -28,10 +32,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
+    // Trigger loading more movies when the user reaches the bottom
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
       final homeController = context.read<HomeController>();
@@ -44,8 +50,37 @@ class _HomeScreenState extends State<HomeScreen> {
     final homeController = context.watch<HomeController>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Movies")),
-      body: homeController.isLoading
+      appBar: AppBar(
+        title: const Text("Movies"),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search movies...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: homeController.searchQuery.isNotEmpty
+                    ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    homeController.clearSearch();
+                  },
+                )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+              ),
+              onChanged: (query) => homeController.searchMovies(query),
+            ),
+          ),
+        ),
+      ),
+      body: homeController.isLoading && homeController.filteredMovies.isEmpty
           ? const LoadingIndicator()
           : homeController.errorMessage.isNotEmpty
           ? Center(
@@ -66,17 +101,17 @@ class _HomeScreenState extends State<HomeScreen> {
       )
           : ListView.builder(
         controller: _scrollController,
-        itemCount: homeController.movies.length +
-            (homeController.isLoadingMore ? 1 : 0),
+        itemCount: homeController.filteredMovies.length +
+            (homeController.isLoading ? 1 : 0), // Add an extra for the loading indicator
         itemBuilder: (context, index) {
-          if (index == homeController.movies.length) {
+          if (index == homeController.filteredMovies.length) {
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
               child: Center(child: CircularProgressIndicator()),
             );
           }
 
-          final movie = homeController.movies[index];
+          final movie = homeController.filteredMovies[index];
           return ListTile(
             leading: Image.network(
               "https://image.tmdb.org/t/p/w200${movie.posterPath}",

@@ -4,16 +4,17 @@ import '../models/movie.dart';
 
 class HomeController with ChangeNotifier {
   List<Movie> movies = [];
+  List<Movie> filteredMovies = [];
   bool isLoading = false;
-  bool isLoadingMore = false;
   String errorMessage = '';
   int currentPage = 1;
   bool hasMore = true;
+  String searchQuery = '';
 
   Future<void> fetchMovies({int page = 1}) async {
-    if (isLoading || isLoadingMore) return;
+    if (isLoading) return;
 
-    page == 1 ? isLoading = true : isLoadingMore = true;
+    isLoading = true;
     notifyListeners();
 
     try {
@@ -26,21 +27,39 @@ class HomeController with ChangeNotifier {
         } else {
           movies.addAll(response);
         }
-        currentPage = page;
+        filteredMovies = movies;
         errorMessage = '';
       }
     } catch (e) {
       errorMessage = 'Failed to load movies. Please try again.';
     } finally {
       isLoading = false;
-      isLoadingMore = false;
       notifyListeners();
     }
   }
 
-  Future<void> loadNextPage() async {
-    if (hasMore) {
-      await fetchMovies(page: currentPage + 1);
+  void loadNextPage() {
+    if (isLoading || !hasMore) return;
+    currentPage++;
+    fetchMovies(page: currentPage);
+  }
+
+  void searchMovies(String query) {
+    searchQuery = query;
+    if (query.isEmpty) {
+      filteredMovies = movies;
+    } else {
+      filteredMovies = movies
+          .where((movie) =>
+          movie.title.toLowerCase().contains(query.toLowerCase()))
+          .toList();
     }
+    notifyListeners();
+  }
+
+  void clearSearch() {
+    searchQuery = '';
+    filteredMovies = movies;
+    notifyListeners();
   }
 }
