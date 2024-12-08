@@ -4,7 +4,6 @@ import 'package:movie_explorer/core/services/api/app_repo.dart';
 import 'package:movie_explorer/models/movie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class HomeController with ChangeNotifier {
   List<Movie> movies = [];
   List<Movie> filteredMovies = [];
@@ -60,18 +59,25 @@ class HomeController with ChangeNotifier {
 
   Future<void> toggleFavorite(Movie movie) async {
     final prefs = await SharedPreferences.getInstance();
-    final movieIndex =
-        favoriteMovies.indexWhere((favMovie) => favMovie.id == movie.id);
 
-    if (movieIndex == -1) {
-      favoriteMovies.add(movie);
+    // Check if the movie is already in the favorites
+    final isFavorite =
+        favoriteMovies.any((favMovie) => favMovie.id == movie.id);
+
+    if (isFavorite) {
+      // Remove if it's already a favorite
+      favoriteMovies.removeWhere((favMovie) => favMovie.id == movie.id);
     } else {
-      favoriteMovies.removeAt(movieIndex);
+      // Add to favorites
+      favoriteMovies.add(movie);
     }
 
-    final favoriteMoviesJson = json
-        .encode(favoriteMovies.map((favMovie) => favMovie.toJson()).toList());
-    await prefs.setString('favorites', favoriteMoviesJson);
+    // Save updated favorites to SharedPreferences
+    final favoriteMoviesJson =
+        favoriteMovies.map((favMovie) => favMovie.toJson()).toList();
+    await prefs.setString('favorites', json.encode(favoriteMoviesJson));
+
+    // Notify listeners
     notifyListeners();
   }
 
