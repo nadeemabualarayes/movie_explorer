@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:movie_explorer/controllers/home_controller.dart';
 import 'package:movie_explorer/routes/app_routes.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  //await dotenv.load(fileName: "assets/.env.prod");
   runApp(
     MultiProvider(
       providers: [
@@ -21,6 +24,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Movie Explorer',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: AppRoutes.home,
       onGenerateRoute: AppRoutes.generateRoute,

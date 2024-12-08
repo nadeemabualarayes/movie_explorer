@@ -1,8 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_explorer/controllers/home_controller.dart';
 import 'package:movie_explorer/views/common.dart';
 import 'package:provider/provider.dart';
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -64,7 +64,8 @@ class _HomeScreenState extends State<HomeScreen> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
@@ -72,12 +73,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: homeController.searchQuery.isNotEmpty
                     ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    homeController.clearSearch();
-                  },
-                )
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          homeController.clearSearch();
+                        },
+                      )
                     : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -89,53 +90,73 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      body: homeController.isLoading && homeController.filteredMovies.isEmpty
-          ? const LoadingIndicator()
-          : homeController.errorMessage.isNotEmpty
-          ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              homeController.errorMessage,
-              style: const TextStyle(color: Colors.red, fontSize: 16),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () => homeController.fetchMovies(),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      )
-          : ListView.builder(
-        controller: _scrollController,
-        itemCount: homeController.filteredMovies.length +
-            (homeController.isLoading ? 1 : 0), // Add an extra for the loading indicator
-        itemBuilder: (context, index) {
-          if (index == homeController.filteredMovies.length) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.0),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-
-          final movie = homeController.filteredMovies[index];
-          return ListTile(
-            leading: Image.network(
-              "https://image.tmdb.org/t/p/w200${movie.posterPath}",
-              width: 50,
-              height: 75,
-              fit: BoxFit.cover,
-            ),
-            title: Text(movie.title),
-            subtitle: Text("Rating: ${movie.rating}"),
-            onTap: () {
-              Navigator.pushNamed(context, '/movie-details',
-                  arguments: movie);
-            },
-          );
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await homeController.fetchMovies(); // Trigger data refresh
         },
+        child: homeController.isLoading && homeController.filteredMovies.isEmpty
+            ? const LoadingIndicator()
+            : homeController.errorMessage.isNotEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          homeController.errorMessage,
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 16),
+                        ),
+                        const SizedBox(height: 10),
+                        ElevatedButton(
+                          onPressed: () => homeController.fetchMovies(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    itemCount: homeController.filteredMovies.length +
+                        (homeController.isLoading
+                            ? 1
+                            : 0), // Add an extra for the loading indicator
+                    itemBuilder: (context, index) {
+                      if (index == homeController.filteredMovies.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      final movie = homeController.filteredMovies[index];
+                      return ListTile(
+                        leading: CachedNetworkImage(
+                          imageUrl:
+                              "https://image.tmdb.org/t/p/w200${movie.posterPath}",
+                          width: 80,
+                          height: 100,
+                          fit: BoxFit.cover,
+                          progressIndicatorBuilder:
+                              (context, url, downloadProgress) => SizedBox(
+                            width: 10,
+                            child: CircularProgressIndicator(
+                              value: downloadProgress.progress,
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Icon(
+                            Icons.error,
+                            size: 10,
+                          ),
+                        ),
+                        title: Text(movie.title),
+                        subtitle: Text("Rating: ${movie.rating}"),
+                        onTap: () {
+                          Navigator.pushNamed(context, '/movie-details',
+                              arguments: movie);
+                        },
+                      );
+                    },
+                  ),
       ),
     );
   }
