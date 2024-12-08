@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:movie_explorer/config/config.dart';
 import 'package:movie_explorer/core/services/api/api_executor.dart';
 import 'package:movie_explorer/core/services/dio/dio.dart';

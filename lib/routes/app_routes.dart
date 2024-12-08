@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:movie_explorer/models/movie.dart';
 import 'package:movie_explorer/views/favorites/favorites_screen.dart';
-import '../views/home/home_screen.dart';
-import '../views/movie_details/movie_details_screen.dart';
-import '../models/movie.dart';
+import 'package:movie_explorer/views/home/home_screen.dart';
+import 'package:movie_explorer/views/movie_details/movie_details_screen.dart';
+
 
 class AppRoutes {
   static const String home = '/';

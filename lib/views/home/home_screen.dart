@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:movie_explorer/controllers/home_controller.dart';
+import 'package:movie_explorer/views/common.dart';
 import 'package:provider/provider.dart';
-import '../../controllers/home_controller.dart';
-import '../../views/common.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

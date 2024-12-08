@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:movie_explorer/core/services/api/app_repo.dart';
+import 'package:movie_explorer/models/movie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/movie.dart';
+
 
 class HomeController with ChangeNotifier {
   List<Movie> movies = [];
