@@ -25,4 +25,16 @@ class Movie {
       rating: (json['vote_average'] ?? 0).toDouble(),
     );
   }
+
+  // To JSON (used for saving data)
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'posterPath': posterPath,
+      'rating': rating,
+      'overview': overview,
+      'release_date': releaseDate
+    };
+  }
 }

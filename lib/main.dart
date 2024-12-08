@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:movie_explorer/controllers/home_controller.dart';
+import 'package:movie_explorer/routes/app_routes.dart';
 import 'package:provider/provider.dart';
-import 'controllers/home_controller.dart';
-import 'routes/app_routes.dart';
 
 void main() {
   runApp(
